@@ -146,7 +146,7 @@ def send_data(kafka_producer):
     # reconnect if there are network issues
     except ChunkedEncodingError:
         print('NETWORK')
-        sendData(producer)
+        send_data(producer)
 
 
 if __name__ == '__main__':
