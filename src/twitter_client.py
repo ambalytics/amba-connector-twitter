@@ -1,7 +1,7 @@
 import socket
 import requests
 import json
-import time
+import logging
 
 
 from kafka import KafkaProducer
@@ -30,19 +30,19 @@ def publish_message(producer_instance, topic_name, key, value):
         value_bytes = bytes(value, encoding='utf-8')
         producer_instance.send(topic_name, key=key_bytes, value=value_bytes)
         producer_instance.flush()
-        print('Message published successfully.')
+        logging.warning('Message published successfully.')
     except Exception as ex:
-        print('Exception in publishing message')
-        print(str(ex))
+        logging.warning('Exception in publishing message')
+        logging.warning(str(ex))
 
 
 def connect_kafka_producer():
     _producer = None
     try:
-        _producer = KafkaProducer(bootstrap_servers=['localhost:9092'], api_version=(0, 10)) # todo port
+        _producer = KafkaProducer(bootstrap_servers=['kafka:9092'], api_version=(0, 10)) # todo port
     except Exception as ex:
-        print('Exception while connecting Kafka')
-        print(str(ex))
+        logging.warning('Exception while connecting Kafka')
+        logging.warning(str(ex))
     finally:
         return _producer
 
@@ -60,7 +60,7 @@ def get_rules(headers):
         raise Exception(
             "Cannot get rules (HTTP {}): {}".format(response.status_code, response.text)
         )
-    print(json.dumps(response.json()))
+    logging.warning(json.dumps(response.json()))
     return response.json()
 
 
@@ -81,7 +81,7 @@ def delete_all_rules(headers, rules):
                 response.status_code, response.text
             )
         )
-    print(json.dumps(response.json()))
+    logging.warning(json.dumps(response.json()))
 
 
 def set_rules(headers):
@@ -115,7 +115,7 @@ def set_rules(headers):
         raise Exception(
             "Cannot add rules (HTTP {}): {}".format(response.status_code, response.text)
         )
-    print(json.dumps(response.json()))
+    logging.warning(json.dumps(response.json()))
 
 
 def send_data(kafka_producer):
@@ -127,7 +127,7 @@ def send_data(kafka_producer):
             headers=headers,
             stream=True,
         )
-        print(response.status_code)
+        logging.warning(response.status_code)
         if response.status_code != 200:
             raise Exception(
                 "Cannot get stream (HTTP {}): {}".format(
@@ -138,14 +138,14 @@ def send_data(kafka_producer):
         i = 0
         for line in response.iter_lines():
             i += 1
-            print(i)
+            logging.warning(i)
             if line:
                 # print(line)
                 publish_message(kafka_producer, kafka_topic_name, kafka_key, line.decode('utf-8'))
 
     # reconnect if there are network issues
     except ChunkedEncodingError:
-        print('NETWORK')
+        logging.warning('NETWORK')
         send_data(producer)
 
 
