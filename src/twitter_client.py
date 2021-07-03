@@ -1,4 +1,6 @@
 import socket
+import time
+
 import requests
 import json
 import logging
@@ -150,6 +152,7 @@ def send_data(kafka_producer):
 
 
 if __name__ == '__main__':
+    time.sleep(10)
     producer = connect_kafka_producer()
     send_data(producer)
 

@@ -3,10 +3,36 @@ import logging
 #from kafka import KafkaConsumer, KafkaProducer
 
 
-class EventStream(object):
+# idee
+# import eventstream reader
+# class inherince
+# override for each message method, use var as string?
+#     -> goal of eventstream
+#
+# o1 here is function, do everything else (mulitple threads etc)
+#
+# o2 here is a class you can ran as you wish
+#
+# o3 (1+2) eventstream class has functions to do multithreads with the class
+#
+# consumer
+# producer
+# consumer producer
+#
+# -> event stream problem (handle multiple or just one each?)
+# eventstreap processor process producer1, consumer2,
+
+class EventStreamBase(object):
+
     event_string: str = "events"
     state_separator: str = "_"
     relation_type_separator: str = "-"
+
+    bootstrap_servers = ['kafka:9092']
+    group_id = 'worker'
+    topic_name = False
+    consumer_timeout_ms = 5000
+    api_version = (0, 10)
 
     config_states = {
         'raw': {
@@ -50,27 +76,6 @@ class EventStream(object):
     # def load_config(self):
     #     #data = yaml.safe_load(open('defaults.yaml'))
     #     #data['url']
-    #
-    # def connect_kafka_producer(self):
-    #     _producer = None
-    #     try:
-    #         _producer = KafkaProducer(bootstrap_servers=['kafka:9092'], api_version=(0, 10))
-    #     except Exception as ex:
-    #         logging.warning('Exception while connecting Kafka')
-    #         logging.warning(str(ex))
-    #     finally:
-    #         return _producer
-
-        def publish_message(producer_instance, topic_name, key, value):
-            try:
-                key_bytes = bytes(key, encoding='utf-8')
-                value_bytes = value
-                producer_instance.send(topic_name, key=key_bytes, value=value_bytes)
-                producer_instance.flush()
-                logging.warning('Message published successfully.')
-            except Exception as ex:
-                logging.warning('Exception in publishing message')
-                print(str(ex))
 
     def resolveEvent(self, event):
         topic_name = self.build_topic_name(event['state'], event['relation_type'])
@@ -80,30 +85,7 @@ class EventStream(object):
         logging.warning("Unable to resolve event, topic_name %s not found" % topic_name)
         return False
 
-    # def get_consumer(self):
-    #     topic_name = 12
-    #     return KafkaConsumer(topic_name, group_id='worker',
-    #                          bootstrap_servers=[self.kafka_server], api_version=(0, 10), consumer_timeout_ms=5000)
-
-    # def get_producer(self):
-    #     self.producer = None
-    #     try:
-    #         self.producer = KafkaProducer(bootstrap_servers=[self.kafka_server], api_version=(0, 10))
-    #     except Exception as ex:
-    #         logging.warning('Exception while connecting Kafka %s', (str(ex)))
-    #     finally:
-    #         return _producer
-
-    def kafka_server(self):
-        return 'kafka:9092'
-
-    def publish(event):
-        print(event)
-
-    def consume(state):
-        print(state)
-
 
 if __name__ == '__main__':
-    e = EventStream()
+    e = EventStreamBase()
     print(e.build_topic_list())
