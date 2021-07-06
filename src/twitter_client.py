@@ -20,7 +20,7 @@ tweet_expansion_key = 'expansions'
 tweet_expansion_value = 'referenced_tweets.id', 'author_id'
 
 # todo config
-kafka_topic_name = 'tweet_queue'
+kafka_topic_name = 'tweets'
 kafka_key = 'parsed'
 
 # todo rules loading/updating
@@ -137,6 +137,7 @@ def send_data(kafka_producer):
                 )
             )
 
+        logging.warning('twitter client kafka %s' % kafka_topic_name)
         i = 0
         for line in response.iter_lines():
             i += 1
@@ -152,7 +153,10 @@ def send_data(kafka_producer):
 
 
 if __name__ == '__main__':
-    time.sleep(10)
+    logging.warning('start twitter client')
+    time.sleep(15)
+    logging.warning('connect')
+
     producer = connect_kafka_producer()
     send_data(producer)
 
