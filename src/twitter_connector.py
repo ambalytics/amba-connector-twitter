@@ -53,7 +53,7 @@ class TwitterConnector(EventStreamProducer):
                 # line.decode('utf-8')
                 twitter_json = json.loads(line.decode('utf-8'))
                 twitter_json['state'] = self.state
-                logging.warning(twitter_json)
+                # logging.warning(twitter_json)
 
                 e = Event()
                 e.set('subj_id', twitter_json['data']['id'])
@@ -61,7 +61,8 @@ class TwitterConnector(EventStreamProducer):
                 e.set('occurred_at', twitter_json['data']['created_at'])
                 e.set('source_id', 'twitter')
                 e.set('state', 'raw')
-                e.set('data', twitter_json)  # todo
+                e.data['subj']['data'] = twitter_json
+                # e.set('data', twitter_json)  # todo
 
                 self.publish(e)
 

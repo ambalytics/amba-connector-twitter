@@ -16,7 +16,7 @@ class EventStreamProducer(EventStreamBase):
             self.create_producer()
 
         value = event.get_json()
-        logging.warning(self.log + "v %s" % value)
+        # logging.warning(self.log + "v %s" % value)
         self.producer.send(topic_event, value=value.encode('utf-8'))
         self.producer.flush()
         logging.warning(self.log + 'Message published successfully to topic %s' % topic_event)
