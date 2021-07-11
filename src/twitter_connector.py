@@ -4,8 +4,8 @@ import time
 import requests
 import json
 
-from EventStream.event_stream_producer import EventStreamProducer
-from EventStream.event import Event
+from event_stream import EventStreamProducer
+from event_stream.event import Event
 
 
 def create_headers(bearer_token):
