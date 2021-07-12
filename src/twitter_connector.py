@@ -4,7 +4,7 @@ import time
 import requests
 import json
 
-from event_stream import EventStreamProducer
+from event_stream.event_stream_producer import EventStreamProducer
 from event_stream.event import Event
 
 
@@ -68,9 +68,12 @@ class TwitterConnector(EventStreamProducer):
 
 
 if __name__ == '__main__':
-    logging.warning('start twitter client')
-    time.sleep(15)
-    logging.warning('connect')
-
     t = TwitterConnector(1)
+
+    logging.warning('start twitter client ... connect in %s' % t.kafka_boot_time)
+    for i in range(t.kafka_boot_time, 0):
+        time.sleep(1)
+        logging.debug('%ss left' % i)
+
+    logging.warning('connect twitter client')
     t.send_data()

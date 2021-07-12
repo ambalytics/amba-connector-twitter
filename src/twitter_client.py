@@ -5,6 +5,7 @@ import requests
 import json
 import logging
 
+# old
 
 from kafka import KafkaProducer
 from requests.exceptions import ChunkedEncodingError
