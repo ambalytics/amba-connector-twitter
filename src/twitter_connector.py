@@ -1,6 +1,6 @@
 import logging
 import time
-
+import uuid
 import requests
 import json
 
@@ -14,7 +14,7 @@ def create_headers(bearer_token):
 
 
 class TwitterConnector(EventStreamProducer):
-    state = "raw"
+    state = "unlinked"
     log = "TwitterConnector "
 
     bearer_token = 'AAAAAAAAAAAAAAAAAAAAACUdPAEAAAAAb23uL%2F0Joyiy9q8ELW6q14y1nIA%3DMVOg6aRZFDesoK1Q6DFl0nCzR7kWDRBEXhAs7nBj6ljD28sO5E'
@@ -55,14 +55,32 @@ class TwitterConnector(EventStreamProducer):
                 twitter_json['state'] = self.state
                 # logging.warning(twitter_json)
 
+                # todo
                 e = Event()
+
+                # todo check for duplicate key? try catch duplicate key error, if catch check
+                # todo the element with the id existing, compare and if different new id and save
+                e.set('id', str(uuid.uuid4()))
+
                 e.set('subj_id', twitter_json['data']['id'])
                 e.set('relation_type', 'discusses')
                 e.set('occurred_at', twitter_json['data']['created_at'])
                 e.set('source_id', 'twitter')
-                e.set('state', 'raw')
-                e.data['subj']['data'] = twitter_json
-                # e.set('data', twitter_json)  # todo
+                e.set('state', 'unlinked')
+
+                e.data['subj']['pid'] = twitter_json['data']['id']
+                e.data['subj']['url'] = "todo"
+                e.data['subj']['title'] = "todo"
+                e.data['subj']['issued'] = "todo"
+                e.data['subj']['author'] = "todo"
+                e.data['subj']['original-tweet-url'] = "todo"
+                e.data['subj']['original-tweet-author'] = "todo"
+                e.data['subj']['alternative-id'] = "todo"
+
+                # todo why state in data?
+                e.data['subj']['data'] = twitter_json['data']
+                e.data['subj']['data']['includes'] = twitter_json['includes']
+                e.data['subj']['data']['matching_rules'] = twitter_json['matching_rules']
 
                 self.publish(e)
 
