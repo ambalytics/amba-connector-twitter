@@ -52,37 +52,55 @@ class TwitterConnector(EventStreamProducer):
                 logging.warning(self.log + "got new message " + str(i))
                 # line.decode('utf-8')
                 twitter_json = json.loads(line.decode('utf-8'))
-                twitter_json['state'] = self.state
                 # logging.warning(twitter_json)
 
-                # todo
-                e = Event()
+                if 'data' in twitter_json and 'includes' in twitter_json and 'matching_rules' in twitter_json \
+                        and 'id' in twitter_json['data'] and 'created_at' in twitter_json['data'] \
+                        and 'referenced_tweets' in twitter_json['data'] and 'author_id' in twitter_json['data']:
+                    e = Event()
 
-                # todo check for duplicate key? try catch duplicate key error, if catch check
-                # todo the element with the id existing, compare and if different new id and save
-                e.set('id', str(uuid.uuid4()))
+                    # todo check for duplicate key? try catch duplicate key error, if catch check
+                    # todo the element with the id existing, compare and if different new id and save
+                    # todo check if twitter id has been used to avoid counting tweets twice
+                    e.set('id', str(uuid.uuid4()))
 
-                e.set('subj_id', twitter_json['data']['id'])
-                e.set('relation_type', 'discusses')
-                e.set('occurred_at', twitter_json['data']['created_at'])
-                e.set('source_id', 'twitter')
-                e.set('state', 'unlinked')
+                    e.set('subj_id', twitter_json['data']['id'])
+                    e.set('relation_type', 'discusses')
+                    e.set('occurred_at', twitter_json['data']['created_at'])
+                    e.set('source_id', 'twitter')
+                    e.set('state', 'unlinked')
 
-                e.data['subj']['pid'] = twitter_json['data']['id']
-                e.data['subj']['url'] = "todo"
-                e.data['subj']['title'] = "todo"
-                e.data['subj']['issued'] = "todo"
-                e.data['subj']['author'] = "todo"
-                e.data['subj']['original-tweet-url'] = "todo"
-                e.data['subj']['original-tweet-author'] = "todo"
-                e.data['subj']['alternative-id'] = "todo"
+                    basePid = "twitter://status?id="
+                    baseAuthorUrl = "twitter://user?screen_name="
+                    e.data['subj']['pid'] = basePid + twitter_json['data']['id']
+                    e.data['subj']['url'] = basePid + twitter_json['data']['id']
+                    e.data['subj']['title'] = "Tweet " + twitter_json['data']['id']
+                    e.data['subj']['issued'] = twitter_json['data']['created_at']
+                    e.data['subj']['author'] = {
+                                                   "url": baseAuthorUrl + get_author_name(
+                                                       twitter_json['data']['author_id'],
+                                                       twitter_json['includes']['users'])
+                                               }
+                    if 'users' in twitter_json['includes'] and 'id' in twitter_json['data']['referenced_tweets'][0]:
+                        e.data['subj']['original-tweet-url'] = basePid + twitter_json['data']['referenced_tweets'][0][
+                            'id']
+                        e.data['subj']['original-tweet-author'] = baseAuthorUrl + get_author_name(
+                            twitter_json['data']['author_id'], twitter_json['includes']['users'], True)
+                    e.data['subj']['alternative-id'] = twitter_json['data']['id']
 
-                # todo why state in data?
-                e.data['subj']['data'] = twitter_json['data']
-                e.data['subj']['data']['includes'] = twitter_json['includes']
-                e.data['subj']['data']['matching_rules'] = twitter_json['matching_rules']
+                    e.data['subj']['data'] = twitter_json['data']
+                    e.data['subj']['data']['includes'] = twitter_json['includes']
+                    e.data['subj']['data']['matching_rules'] = twitter_json['matching_rules']
 
-                self.publish(e)
+                    self.publish(e)
+
+
+def get_author_name(author_id, users, original=False):
+    for user in users:
+        if ('id' in user and 'username' in user) and (
+                (user['id'] == author_id and not original) or user['id'] != author_id and original):
+            return user['username']
+    return ""
 
 
 if __name__ == '__main__':
@@ -94,4 +112,7 @@ if __name__ == '__main__':
         logging.debug('%ss left' % i)
 
     logging.warning('connect twitter client')
+
+    # todo make this error restart save
+    # todo add shutdown operation
     t.send_data()
