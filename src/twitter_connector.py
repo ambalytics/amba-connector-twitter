@@ -23,6 +23,11 @@ class TwitterConnector(EventStreamProducer):
                           'attachments', 'geo', 'context_annotations', 'entities', 'public_metrics', 'lang', 'source',
                           'reply_settings']
 
+    user_expansion_key = 'user.fields'
+    user_expansion_value = ['created_at', 'description', 'entities', 'id', 'location', 'name', 'pinned_tweet_id',
+                            'profile_image_url', 'protected', 'public_metrics', 'url', 'username', 'verified',
+                            'withheld']
+
     tweet_expansion_key = 'expansions'
     tweet_expansion_value = 'referenced_tweets.id', 'author_id'
 
@@ -32,11 +37,16 @@ class TwitterConnector(EventStreamProducer):
         response = requests.get(
             "https://api.twitter.com/2/tweets/search/stream",
             params={self.tweet_expansion_key: ','.join(self.tweet_expansion_value),
-                    self.tweet_fields_key: ','.join(self.tweet_fields_value)},
+                    self.tweet_fields_key: ','.join(self.tweet_fields_value),
+                    self.user_expansion_key: ','.join(self.user_expansion_value)},
             headers=headers,
             stream=True,
         )
-        # logging.warning(response.status_code)
+        logging.warning({self.tweet_expansion_key: ','.join(self.tweet_expansion_value),
+                    self.tweet_fields_key: ','.join(self.tweet_fields_value),
+                    self.user_expansion_key: ','.join(self.user_expansion_value)})
+        logging.warning(response.status_code)
+        logging.warning(response)
 
         if response.status_code != 200:
             raise Exception(
