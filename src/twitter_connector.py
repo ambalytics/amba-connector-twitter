@@ -1,4 +1,5 @@
 import logging
+import threading
 import time
 import uuid
 import requests
@@ -31,7 +32,18 @@ class TwitterConnector(EventStreamProducer):
     tweet_expansion_key = 'expansions'
     tweet_expansion_value = 'referenced_tweets.id', 'author_id'
 
+    counter = 0
+
+    def throughput_statistics(self, time_delta):
+        logging.warning("THROUGHPUT: %d / %d" % (self.counter, time_delta))
+        self.counter = 0
+
+        threading.Timer(time_delta, self.throughput_statistics, args=[time_delta]).start()
+
     def send_data(self):
+        time_delta = 10
+        self.counter = 0
+        threading.Timer(time_delta, self.throughput_statistics, args=[time_delta]).start()
 
         headers = create_headers(self.bearer_token)
         response = requests.get(
@@ -68,6 +80,8 @@ class TwitterConnector(EventStreamProducer):
                         and 'id' in twitter_json['data'] and 'created_at' in twitter_json['data'] \
                         and 'referenced_tweets' in twitter_json['data'] and 'author_id' in twitter_json['data']:
                     e = Event()
+
+                    self.counter += 1
 
                     # todo check for duplicate key? try catch duplicate key error, if catch check
                     # todo the element with the id existing, compare and if different new id and save

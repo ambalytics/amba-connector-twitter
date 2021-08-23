@@ -1,0 +1,27 @@
+site_name: Amba Connector Twitter
+site_description: 'documentation for amba-connector-twitter'
+site_author: 'Lukas Jesche'
+docs_dir: docs/
+repo_name: 'ambalytics/amba-connector-twitter'
+repo_url: 'https://github.com/ambalytics/amba-connector-twitter'
+nav:
+    - Home: index.md
+    - Code Reference:
+      - twitter client: twitter_client_ref.md
+      - twitter connector: twitter_connector_ref.md
+
+theme:
+  name: material
+  palette:
+    scheme: preference
+    primary: teal
+    accent: purple
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - sys.path.append("src")

@@ -1,0 +1,7 @@
+requests
+amba-event-stream
+ruamel.yaml
+
+mkdocs
+mkdocs-material
+mkdocstrings
