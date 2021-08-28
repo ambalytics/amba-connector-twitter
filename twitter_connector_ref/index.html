@@ -14,7 +14,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.4">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.5">
     
     
       
@@ -22,7 +22,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.f7f47774.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.be71726b.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.3f5d1f46.min.css">
@@ -296,6 +296,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#twitter_connector.get_author_name" class="md-nav__link">
+    get_author_name()
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -340,6 +347,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#twitter_connector.get_author_name" class="md-nav__link">
+    get_author_name()
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -376,6 +390,73 @@
 
 
 
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="twitter_connector.get_author_name" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_author_name</span><span class="p">(</span><span class="n">author_id</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">original</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>get the name of the author from the includes</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>-</code></td>
+        <td><code>author_id</code></td>
+        <td><p>the author_id</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>-</code></td>
+        <td><code>users</code></td>
+        <td><p>the users part of the includes</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>-</code></td>
+        <td><code>original</code></td>
+        <td></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>src/twitter_connector.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_author_name</span><span class="p">(</span><span class="n">author_id</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">original</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;get the name of the author from the includes</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        - author_id: the author_id</span>
+<span class="sd">        - users: the users part of the includes</span>
+<span class="sd">        - original:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">user</span> <span class="ow">and</span> <span class="s1">&#39;username&#39;</span> <span class="ow">in</span> <span class="n">user</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">user</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">author_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">original</span><span class="p">)</span> <span class="ow">or</span> <span class="n">user</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">author_id</span> <span class="ow">and</span> <span class="n">original</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">user</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
 
 
 
@@ -442,10 +523,10 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.709b4209.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.409db549.min.js", "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.febc23d1.min.js"></script>
+      <script src="../assets/javascripts/bundle.56a63758.min.js"></script>
       
     
   </body>
