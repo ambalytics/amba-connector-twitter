@@ -117,9 +117,22 @@ class TwitterConnector(EventStreamProducer):
                     e.data['subj']['data']['matching_rules'] = twitter_json['matching_rules']
 
                     self.publish(e)
+            else:
+                logging.warning('no line error')
+
+        logging.warning('stream end, restart in 5')
+        time.sleep(5)
+        self.send_data()
 
 
 def get_author_name(author_id, users, original=False):
+    """get the name of the author from the includes
+
+    Arguments:
+        - author_id: the author_id
+        - users: the users part of the includes
+        - original:
+    """
     for user in users:
         if ('id' in user and 'username' in user) and (
                 (user['id'] == author_id and not original) or user['id'] != author_id and original):
