@@ -1,4 +1,5 @@
 import logging
+import os
 import threading
 import time
 import uuid
@@ -18,7 +19,6 @@ class TwitterConnector(EventStreamProducer):
     state = "unlinked"
     log = "TwitterConnector "
 
-    bearer_token = 'AAAAAAAAAAAAAAAAAAAAACUdPAEAAAAAb23uL%2F0Joyiy9q8ELW6q14y1nIA%3DMVOg6aRZFDesoK1Q6DFl0nCzR7kWDRBEXhAs7nBj6ljD28sO5E'
     tweet_fields_key = 'tweet.fields'
     tweet_fields_value = ['created_at', 'author_id', 'conversation_id', 'in_reply_to_user_id', 'referenced_tweets',
                           'attachments', 'geo', 'context_annotations', 'entities', 'public_metrics', 'lang', 'source',
@@ -45,7 +45,8 @@ class TwitterConnector(EventStreamProducer):
         self.counter = 0
         threading.Timer(time_delta, self.throughput_statistics, args=[time_delta]).start()
 
-        headers = create_headers(self.bearer_token)
+        bearer_token = os.environ['BERARER_TOKEN']
+        headers = create_headers(bearer_token)
         response = requests.get(
             "https://api.twitter.com/2/tweets/search/stream",
             params={self.tweet_expansion_key: ','.join(self.tweet_expansion_value),

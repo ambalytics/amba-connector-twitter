@@ -1,3 +1,4 @@
+import os
 import socket
 import time
 
@@ -41,8 +42,9 @@ def publish_message(producer_instance, topic_name, key, value):
 
 def connect_kafka_producer():
     _producer = None
+    bootstrap_servers = [os.environ['KAFKA_BOOTRSTRAP_SERVER']]
     try:
-        _producer = KafkaProducer(bootstrap_servers=['kafka:9092'], api_version=(0, 10)) # todo port
+        _producer = KafkaProducer(bootstrap_servers=bootstrap_servers, api_version=(0, 10)) # todo port
     except Exception as ex:
         logging.warning('Exception while connecting Kafka')
         logging.warning(str(ex))
