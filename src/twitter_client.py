@@ -42,7 +42,7 @@ def publish_message(producer_instance, topic_name, key, value):
 
 def connect_kafka_producer():
     _producer = None
-    bootstrap_servers = [os.environ['KAFKA_BOOTRSTRAP_SERVER']]
+    bootstrap_servers = [os.environ.get('KAFKA_BOOTRSTRAP_SERVER', 'kafka:9092')]
     try:
         _producer = KafkaProducer(bootstrap_servers=bootstrap_servers, api_version=(0, 10)) # todo port
     except Exception as ex:
