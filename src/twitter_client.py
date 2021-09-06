@@ -7,12 +7,10 @@ import json
 import logging
 
 # old
+# maybe use to change url list
 
 from kafka import KafkaProducer
 from requests.exceptions import ChunkedEncodingError
-
-# todo into own file
-bearer_token = 'AAAAAAAAAAAAAAAAAAAAACUdPAEAAAAAb23uL%2F0Joyiy9q8ELW6q14y1nIA%3DMVOg6aRZFDesoK1Q6DFl0nCzR7kWDRBEXhAs7nBj6ljD28sO5E'
 
 # todo clean up what we need
 tweet_fields_key = 'tweet.fields'

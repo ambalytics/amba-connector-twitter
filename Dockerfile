@@ -6,4 +6,6 @@ WORKDIR /src
 COPY . .
 
 RUN pip install -r src/requirements.txt
-CMD [ "python", "./src/twitter_connector.py" ]
+#CMD [ "python", "./src/twitter_connector.py" ]
+
+ENTRYPOINT ["/bin/bash", "-c", "./scripts/entrypoint.sh"]

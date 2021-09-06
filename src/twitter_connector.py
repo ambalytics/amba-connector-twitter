@@ -125,6 +125,14 @@ class TwitterConnector(EventStreamProducer):
         time.sleep(5)
         self.send_data()
 
+    @staticmethod
+    def start(i=0):
+        """start the consumer
+        """
+        tc = TwitterConnector(i)
+        logging.debug(TwitterConnector.log + 'Start %s' % str(i))
+        tc.send_data()
+
 
 def get_author_name(author_id, users, original=False):
     """get the name of the author from the includes
@@ -142,15 +150,4 @@ def get_author_name(author_id, users, original=False):
 
 
 if __name__ == '__main__':
-    t = TwitterConnector(1)
-
-    logging.warning('start twitter client ... connect in %s' % t.kafka_boot_time)
-    for i in range(t.kafka_boot_time, 0):
-        time.sleep(1)
-        logging.debug('%ss left' % i)
-
-    logging.warning('connect twitter client')
-
-    # todo make this error restart save
-    # todo add shutdown operation
-    t.send_data()
+    TwitterConnector.start(1)
