@@ -7,4 +7,5 @@ COPY . .
 
 RUN pip install -r src/requirements.txt
 
-ENTRYPOINT ["/bin/bash", "-c", "./scripts/entrypoint.sh"]
+#ENTRYPOINT ["/bin/bash", "-c", "./scripts/entrypoint.sh"]
+ENTRYPOINT ["sh", "./scripts/entrypoint.sh"]
