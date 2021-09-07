@@ -52,7 +52,7 @@ class TwitterConnector(EventStreamProducer):
         self.counter = 0
         threading.Timer(time_delta, self.throughput_statistics, args=[time_delta]).start()
 
-        bearer_token = os.environ['BERARER_TOKEN']
+        bearer_token = os.getenv('TWITTER_BEARER_TOKEN')
         headers = create_headers(bearer_token)
         response = requests.get(
             "https://api.twitter.com/2/tweets/search/stream",
