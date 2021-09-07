@@ -35,12 +35,19 @@ class TwitterConnector(EventStreamProducer):
     counter = 0
 
     def throughput_statistics(self, time_delta):
+        """statistic tools
+
+        Arguments:
+            - time_delta: how often to run this
+        """
         logging.warning("THROUGHPUT: %d / %d" % (self.counter, time_delta))
         self.counter = 0
 
         threading.Timer(time_delta, self.throughput_statistics, args=[time_delta]).start()
 
     def send_data(self):
+        """open the stream to twitter and send the data as events to kafka
+        """
         time_delta = 10
         self.counter = 0
         threading.Timer(time_delta, self.throughput_statistics, args=[time_delta]).start()
@@ -56,8 +63,8 @@ class TwitterConnector(EventStreamProducer):
             stream=True,
         )
         logging.warning({self.tweet_expansion_key: ','.join(self.tweet_expansion_value),
-                    self.tweet_fields_key: ','.join(self.tweet_fields_value),
-                    self.user_expansion_key: ','.join(self.user_expansion_value)})
+                         self.tweet_fields_key: ','.join(self.tweet_fields_value),
+                         self.user_expansion_key: ','.join(self.user_expansion_value)})
         logging.warning(response.status_code)
         logging.warning(response)
 
@@ -102,10 +109,10 @@ class TwitterConnector(EventStreamProducer):
                     e.data['subj']['title'] = "Tweet " + twitter_json['data']['id']
                     e.data['subj']['issued'] = twitter_json['data']['created_at']
                     e.data['subj']['author'] = {
-                                                   "url": baseAuthorUrl + get_author_name(
-                                                       twitter_json['data']['author_id'],
-                                                       twitter_json['includes']['users'])
-                                               }
+                        "url": baseAuthorUrl + get_author_name(
+                            twitter_json['data']['author_id'],
+                            twitter_json['includes']['users'])
+                    }
                     if 'users' in twitter_json['includes'] and 'id' in twitter_json['data']['referenced_tweets'][0]:
                         e.data['subj']['original-tweet-url'] = basePid + twitter_json['data']['referenced_tweets'][0][
                             'id']
@@ -125,6 +132,17 @@ class TwitterConnector(EventStreamProducer):
         time.sleep(5)
         self.send_data()
 
+    @staticmethod
+    def start(i=0):
+        """start the consumer
+
+        Arguments:
+        - i: id to use
+        """
+        tc = TwitterConnector(i)
+        logging.debug(TwitterConnector.log + 'Start %s' % str(i))
+        tc.send_data()
+
 
 def get_author_name(author_id, users, original=False):
     """get the name of the author from the includes
@@ -142,15 +160,4 @@ def get_author_name(author_id, users, original=False):
 
 
 if __name__ == '__main__':
-    t = TwitterConnector(1)
-
-    logging.warning('start twitter client ... connect in %s' % t.kafka_boot_time)
-    for i in range(t.kafka_boot_time, 0):
-        time.sleep(1)
-        logging.debug('%ss left' % i)
-
-    logging.warning('connect twitter client')
-
-    # todo make this error restart save
-    # todo add shutdown operation
-    t.send_data()
+    TwitterConnector.start(1)
