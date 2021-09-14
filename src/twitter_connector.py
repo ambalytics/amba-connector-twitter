@@ -48,7 +48,7 @@ class TwitterConnector(EventStreamProducer):
     def send_data(self):
         """open the stream to twitter and send the data as events to kafka
         """
-        time_delta = 10
+        time_delta = 30
         self.counter = 0
         threading.Timer(time_delta, self.throughput_statistics, args=[time_delta]).start()
 
@@ -62,14 +62,16 @@ class TwitterConnector(EventStreamProducer):
             headers=headers,
             stream=True,
         )
-        logging.warning({self.tweet_expansion_key: ','.join(self.tweet_expansion_value),
+
+        logging.debug('twitter response data')
+        logging.debug({self.tweet_expansion_key: ','.join(self.tweet_expansion_value),
                          self.tweet_fields_key: ','.join(self.tweet_fields_value),
                          self.user_expansion_key: ','.join(self.user_expansion_value)})
-        logging.warning(response.status_code)
-        logging.warning(response)
+        logging.debug(response.status_code)
+        logging.debug(response)
 
         if response.status_code != 200:
-            raise Exception(
+            raise ConnectionError(
                 "Cannot get stream (HTTP {}): {}".format(
                     response.status_code, response.text
                 )
@@ -79,7 +81,7 @@ class TwitterConnector(EventStreamProducer):
         for line in response.iter_lines():
             if line:
                 i += 1
-                logging.warning(self.log + "got new message " + str(i))
+                logging.debug(self.log + "got new message " + str(i))
                 # line.decode('utf-8')
                 twitter_json = json.loads(line.decode('utf-8'))
                 # logging.warning(twitter_json)
@@ -128,20 +130,28 @@ class TwitterConnector(EventStreamProducer):
             else:
                 logging.warning('no line error')
 
-        logging.warning('stream end, restart in 5')
-        time.sleep(5)
-        self.send_data()
+    def run(self):
+        while self.running:
+            try:
+                self.send_data()
+            except ConnectionError:
+                logging.exception(self.log)
+
+            logging.warning('stream restart in 5')
+            time.sleep(5)
 
     @staticmethod
     def start(i=0):
-        """start the consumer
+        """start the consumer, wait 5 sec in case its a restart
 
         Arguments:
         - i: id to use
         """
+        time.sleep(5)
         tc = TwitterConnector(i)
         logging.debug(TwitterConnector.log + 'Start %s' % str(i))
-        tc.send_data()
+        tc.running = True
+        tc.run()
 
 
 def get_author_name(author_id, users, original=False):
