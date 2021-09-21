@@ -88,7 +88,7 @@ class TwitterConnector(EventStreamProducer):
 
                 if 'data' in twitter_json and 'includes' in twitter_json and 'matching_rules' in twitter_json \
                         and 'id' in twitter_json['data'] and 'created_at' in twitter_json['data'] \
-                        and 'referenced_tweets' in twitter_json['data'] and 'author_id' in twitter_json['data']:
+                        and 'author_id' in twitter_json['data']:
                     e = Event()
 
                     self.counter += 1
@@ -115,7 +115,9 @@ class TwitterConnector(EventStreamProducer):
                             twitter_json['data']['author_id'],
                             twitter_json['includes']['users'])
                     }
-                    if 'users' in twitter_json['includes'] and 'id' in twitter_json['data']['referenced_tweets'][0]:
+
+                    if 'users' in twitter_json['includes'] and 'referenced_tweets' in twitter_json['data'] \
+                            and 'id' in twitter_json['data']['referenced_tweets'][0]:
                         e.data['subj']['original-tweet-url'] = basePid + twitter_json['data']['referenced_tweets'][0][
                             'id']
                         e.data['subj']['original-tweet-author'] = baseAuthorUrl + get_author_name(
