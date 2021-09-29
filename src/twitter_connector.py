@@ -14,6 +14,47 @@ def create_headers(bearer_token):
     headers = {"Authorization": "Bearer {}".format(bearer_token)}
     return headers
 
+# Traceback (most recent call last):
+# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 697, in _update_chunk_length
+# self.chunk_left = int(line, 16)
+# ValueError: invalid literal for int() with base 16: b''
+# During handling of the above exception, another exception occurred:
+# Traceback (most recent call last):
+# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 438, in _error_catcher
+# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 764, in read_chunked
+# self._update_chunk_length()
+# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 701, in _update_chunk_length
+# raise InvalidChunkLength(self, line)
+# urllib3.exceptions.InvalidChunkLength: InvalidChunkLength(got length b'', 0 bytes read)
+# During handling of the above exception, another exception occurred:
+# Traceback (most recent call last):
+# File "/usr/local/lib/python3.6/site-packages/requests/models.py", line 758, in generate
+# for chunk in self.raw.stream(chunk_size, decode_content=True):
+# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 572, in stream
+# for line in self.read_chunked(amt, decode_content=decode_content):
+# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 793, in read_chunked
+# self._original_response.close()
+# File "/usr/local/lib/python3.6/contextlib.py", line 99, in __exit__
+# self.gen.throw(type, value, traceback)
+# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 455, in _error_catcher
+# raise ProtocolError("Connection broken: %r" % e, e)
+# urllib3.exceptions.ProtocolError: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", InvalidChunkLength(got length b'', 0 bytes read))
+# During handling of the above exception, another exception occurred:
+# Traceback (most recent call last):
+# File "./src/twitter_connector.py", line 175, in <module>
+# TwitterConnector.start(1)
+# File "./src/twitter_connector.py", line 156, in start
+# tc.run()
+# File "./src/twitter_connector.py", line 138, in run
+# self.send_data()
+# File "./src/twitter_connector.py", line 81, in send_data
+# for line in response.iter_lines():
+# File "/usr/local/lib/python3.6/site-packages/requests/models.py", line 802, in iter_lines
+# for chunk in self.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode):
+# File "/usr/local/lib/python3.6/site-packages/requests/models.py", line 761, in generate
+# raise ChunkedEncodingError(e)
+# requests.exceptions.ChunkedEncodingError: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", InvalidChunkLength(got length b'', 0 bytes read))
+
 
 class TwitterConnector(EventStreamProducer):
     state = "unlinked"
