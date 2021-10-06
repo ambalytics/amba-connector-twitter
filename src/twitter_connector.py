@@ -6,6 +6,7 @@ import uuid
 import requests
 import json
 
+import urllib3
 from event_stream.event_stream_producer import EventStreamProducer
 from event_stream.event import Event
 
@@ -13,6 +14,7 @@ from event_stream.event import Event
 def create_headers(bearer_token):
     headers = {"Authorization": "Bearer {}".format(bearer_token)}
     return headers
+
 
 # Traceback (most recent call last):
 # File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 697, in _update_chunk_length
@@ -106,8 +108,8 @@ class TwitterConnector(EventStreamProducer):
 
         logging.debug('twitter response data')
         logging.debug({self.tweet_expansion_key: ','.join(self.tweet_expansion_value),
-                         self.tweet_fields_key: ','.join(self.tweet_fields_value),
-                         self.user_expansion_key: ','.join(self.user_expansion_value)})
+                       self.tweet_fields_key: ','.join(self.tweet_fields_value),
+                       self.user_expansion_key: ','.join(self.user_expansion_value)})
         logging.debug(response.status_code)
         logging.debug(response)
 
@@ -177,7 +179,8 @@ class TwitterConnector(EventStreamProducer):
         while self.running:
             try:
                 self.send_data()
-            except ConnectionError:
+            except ConnectionError or urllib3.exceptions.InvalidChunkLength or ValueError \
+                   or urllib3.exceptions.ProtocolError or requests.exceptions.ChunkedEncodingError:
                 logging.exception(self.log)
 
             logging.warning('stream restart in 5')
