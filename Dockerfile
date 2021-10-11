@@ -5,6 +5,7 @@ RUN pip install --upgrade pip
 WORKDIR /src
 COPY . .
 
+RUN pip install --upgrade sentry-sdk
 RUN pip install -r src/requirements.txt
 
 #ENTRYPOINT ["/bin/bash", "-c", "./scripts/entrypoint.sh"]
