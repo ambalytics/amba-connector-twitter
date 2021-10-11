@@ -5,6 +5,7 @@ import time
 import uuid
 import requests
 import json
+import sentry_sdk
 
 import urllib3
 from event_stream.event_stream_producer import EventStreamProducer
@@ -14,48 +15,6 @@ from event_stream.event import Event
 def create_headers(bearer_token):
     headers = {"Authorization": "Bearer {}".format(bearer_token)}
     return headers
-
-
-# Traceback (most recent call last):
-# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 697, in _update_chunk_length
-# self.chunk_left = int(line, 16)
-# ValueError: invalid literal for int() with base 16: b''
-# During handling of the above exception, another exception occurred:
-# Traceback (most recent call last):
-# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 438, in _error_catcher
-# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 764, in read_chunked
-# self._update_chunk_length()
-# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 701, in _update_chunk_length
-# raise InvalidChunkLength(self, line)
-# urllib3.exceptions.InvalidChunkLength: InvalidChunkLength(got length b'', 0 bytes read)
-# During handling of the above exception, another exception occurred:
-# Traceback (most recent call last):
-# File "/usr/local/lib/python3.6/site-packages/requests/models.py", line 758, in generate
-# for chunk in self.raw.stream(chunk_size, decode_content=True):
-# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 572, in stream
-# for line in self.read_chunked(amt, decode_content=decode_content):
-# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 793, in read_chunked
-# self._original_response.close()
-# File "/usr/local/lib/python3.6/contextlib.py", line 99, in __exit__
-# self.gen.throw(type, value, traceback)
-# File "/usr/local/lib/python3.6/site-packages/urllib3/response.py", line 455, in _error_catcher
-# raise ProtocolError("Connection broken: %r" % e, e)
-# urllib3.exceptions.ProtocolError: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", InvalidChunkLength(got length b'', 0 bytes read))
-# During handling of the above exception, another exception occurred:
-# Traceback (most recent call last):
-# File "./src/twitter_connector.py", line 175, in <module>
-# TwitterConnector.start(1)
-# File "./src/twitter_connector.py", line 156, in start
-# tc.run()
-# File "./src/twitter_connector.py", line 138, in run
-# self.send_data()
-# File "./src/twitter_connector.py", line 81, in send_data
-# for line in response.iter_lines():
-# File "/usr/local/lib/python3.6/site-packages/requests/models.py", line 802, in iter_lines
-# for chunk in self.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode):
-# File "/usr/local/lib/python3.6/site-packages/requests/models.py", line 761, in generate
-# raise ChunkedEncodingError(e)
-# requests.exceptions.ChunkedEncodingError: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", InvalidChunkLength(got length b'', 0 bytes read))
 
 
 class TwitterConnector(EventStreamProducer):
@@ -77,23 +36,28 @@ class TwitterConnector(EventStreamProducer):
 
     counter = 0
 
-    def throughput_statistics(self, time_delta):
+    def throughput_statistics(self, time_delta, i):
         """statistic tools
 
         Arguments:
             - time_delta: how often to run this
         """
         logging.warning("THROUGHPUT: %d / %d" % (self.counter, time_delta))
+        if self.counter == 0:
+            i += 1
+        if i == 5:
+            TwitterConnector.start(1)
+
         self.counter = 0
 
-        threading.Timer(time_delta, self.throughput_statistics, args=[time_delta]).start()
+        threading.Timer(time_delta, self.throughput_statistics, args=[time_delta, i]).start()
 
     def send_data(self):
         """open the stream to twitter and send the data as events to kafka
         """
         time_delta = 30
         self.counter = 0
-        threading.Timer(time_delta, self.throughput_statistics, args=[time_delta]).start()
+        threading.Timer(time_delta, self.throughput_statistics, args=[time_delta, 0]).start()
 
         bearer_token = os.getenv('TWITTER_BEARER_TOKEN')
         headers = create_headers(bearer_token)
@@ -136,9 +100,6 @@ class TwitterConnector(EventStreamProducer):
 
                     self.counter += 1
 
-                    # todo check for duplicate key? try catch duplicate key error, if catch check
-                    # todo the element with the id existing, compare and if different new id and save
-                    # todo check if twitter id has been used to avoid counting tweets twice
                     e.set('id', str(uuid.uuid4()))
 
                     e.set('subj_id', twitter_json['data']['id'])
@@ -172,19 +133,25 @@ class TwitterConnector(EventStreamProducer):
                     e.data['subj']['data']['matching_rules'] = twitter_json['matching_rules']
 
                     self.publish(e)
+                else:
+                    logging.warning(twitter_json)
             else:
-                logging.warning('no line error')
+                logging.debug('keep alive')
 
     def run(self):
         while self.running:
             try:
                 self.send_data()
-            except ConnectionError or urllib3.exceptions.InvalidChunkLength or ValueError \
-                   or urllib3.exceptions.ProtocolError or requests.exceptions.ChunkedEncodingError:
+            except (requests.Timeout, ValueError,
+                    requests.exceptions.ChunkedEncodingError, urllib3.exceptions.InvalidChunkLength,
+                    urllib3.exceptions.ReadTimeoutError, urllib3.exceptions.ProtocolError):
                 logging.exception(self.log)
-
-            logging.warning('stream restart in 5')
-            time.sleep(5)
+            except requests.ConnectionError:
+                logging.exception(self.log)
+                time.sleep(10)  # sleep a little to avoid issues with max connections
+            finally:
+                logging.warning('stream restart in 10')
+                time.sleep(10)
 
     @staticmethod
     def start(i=0):
@@ -193,7 +160,7 @@ class TwitterConnector(EventStreamProducer):
         Arguments:
         - i: id to use
         """
-        time.sleep(5)
+        time.sleep(10)
         tc = TwitterConnector(i)
         logging.debug(TwitterConnector.log + 'Start %s' % str(i))
         tc.running = True
@@ -216,4 +183,11 @@ def get_author_name(author_id, users, original=False):
 
 
 if __name__ == '__main__':
+    SENTRY_DSN = os.environ.get('SENTRY_DSN')
+    SENTRY_TRACE_SAMPLE_RATE = os.environ.get('SENTRY_TRACE_SAMPLE_RATE')
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=SENTRY_TRACE_SAMPLE_RATE
+    )
+
     TwitterConnector.start(1)
