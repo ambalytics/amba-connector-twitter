@@ -7,7 +7,6 @@ repo_url: 'https://github.com/ambalytics/amba-connector-twitter'
 nav:
     - Home: index.md
     - Code Reference:
-      - twitter client: twitter_client_ref.md
       - twitter connector: twitter_connector_ref.md
 
 theme:

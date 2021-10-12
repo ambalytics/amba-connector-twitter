@@ -1,7 +1,7 @@
 requests
 amba-event-stream
 ruamel.yaml
-
+sentry_sdk
 mkdocs
 mkdocs-material
 mkdocstrings
