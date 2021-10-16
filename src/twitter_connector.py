@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import threading
 import time
 import uuid
@@ -46,7 +47,7 @@ class TwitterConnector(EventStreamProducer):
         if self.counter == 0:
             i += 1
         if i == 5:
-            TwitterConnector.start(1)
+            sys.exit() # end so it will restart clean
 
         self.counter = 0
 
