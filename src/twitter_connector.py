@@ -14,6 +14,11 @@ from event_stream.event import Event
 
 
 def create_headers(bearer_token):
+    """create the header needed for bearer authorization
+
+    Arguments:
+        - time_delta: how often to run this
+    """
     headers = {"Authorization": "Bearer {}".format(bearer_token)}
     return headers
 
@@ -90,9 +95,7 @@ class TwitterConnector(EventStreamProducer):
             if line:
                 i += 1
                 logging.debug(self.log + "got new message " + str(i))
-                # line.decode('utf-8')
                 twitter_json = json.loads(line.decode('utf-8'))
-                # logging.warning(twitter_json)
 
                 if 'data' in twitter_json and 'includes' in twitter_json and 'matching_rules' in twitter_json \
                         and 'id' in twitter_json['data'] and 'created_at' in twitter_json['data'] \
@@ -140,6 +143,11 @@ class TwitterConnector(EventStreamProducer):
                 logging.debug('keep alive')
 
     def run(self):
+        """run function ensuring the connector is either running correctly or restarting / reconnecting as needed
+
+        Arguments:
+            - time_delta: how often to run this
+        """
         while self.running:
             try:
                 self.send_data()
