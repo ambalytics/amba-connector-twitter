@@ -14,7 +14,7 @@
       
       
       <link rel="icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.3">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.6">
     
     
       
@@ -22,7 +22,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.5143246d.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.a57b2b03.min.css">
       
         
         <link rel="stylesheet" href="assets/stylesheets/palette.3f5d1f46.min.css">
@@ -293,6 +293,8 @@
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
+
+
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
@@ -316,6 +318,40 @@
                 
                 
                 <h1 id="amba-connector-twitter">amba-connector-twitter</h1>
+<p>The twitter connector is the main source of event data. It connects the
+Twitter API [^1] with the Amba Analysis Stream platform. Therefore, the
+connector uses a combination of keys, and access to a <em>filtered stream</em>
+with a defined set of attributes. The filtered stream, a Twitter API
+feature, is configured per account prior to accessing the stream.
+Filters may contain a list of rules, in our case a list of domains that
+contain the most popular publisher as well as plain doi.org URLs. 
+If tweets match these rules, they
+are added to the filtered stream and are accessible by the twitter
+connector. The Twitter connector is implemented in python and uses the
+amba-event-streams package.</p>
+<p>For a successful connection and initiation of a tweet stream, a
+so-called <em>Bearer Token</em> that identifies the account is necessary. The
+token further ensures that the correct rules are applied. The Twitter
+API account used is an academic account provided by Twitter, that allows
+retrieving up to 10 million tweets a month. The data retrieved from
+Twitter can be adjusted by setting “keys” in the request. These keys
+allow to extend the retrieved Twitter data in JSON format and may add
+data about the tweet author, referenced tweets and additional tweet
+data.</p>
+<p>Once established, the connection persists and every received tweet is
+decoded and transformed into an “amba-event” object. At this point, the
+subject of the amba-event, i.e., the tweet, is filled with data
+extracted from the JSON. The state of this event is set to <em>unlinked</em>
+since the connection to the object, the publication, has not been made
+yet. Once completed setting the subject and general attributes, the
+event is published to Kafka.</p>
+<p>In case of connection issues or any sorts of error, the connector is
+able to recognize such errors and restarts the connection. In order to
+ensure reliability, a processing thread periodically checks how many
+tweets have been received. If there are no tweets for multiple
+consecutive checks, the twitter connector container is restarted to
+reset to working state.</p>
+<p>[^1]: <a href="https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/introduction">https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/introduction</a>, APIv2 </p>
                 
               
               
@@ -373,10 +409,10 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.8397ff9e.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.fcfe8b6d.min.js", "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.f89c2efe.min.js"></script>
+      <script src="assets/javascripts/bundle.b1047164.min.js"></script>
       
     
   </body>
