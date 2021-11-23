@@ -576,7 +576,7 @@ TwitterConnector            (<span title="event_stream.event_stream_producer.Eve
             <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">ConnectionError</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
-            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># sleep a little to avoid issues with max connections</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># sleep a little to avoid issues with max connections</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;stream restart in 10&#39;</span><span class="p">)</span>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -609,7 +609,10 @@ TwitterConnector            (<span title="event_stream.event_stream_producer.Eve
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">time_delta</span> <span class="o">=</span> <span class="mi">30</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">threading</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="n">time_delta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">throughput_statistics</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">time_delta</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="n">api_limit_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="n">time_delta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">throughput_statistics</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">time_delta</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">api_limit_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">api_limit_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="n">bearer_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;TWITTER_BEARER_TOKEN&#39;</span><span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">create_headers</span><span class="p">(</span><span class="n">bearer_token</span><span class="p">)</span>
@@ -786,7 +789,9 @@ TwitterConnector            (<span title="event_stream.event_stream_producer.Eve
 
     <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">threading</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="n">time_delta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">throughput_statistics</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">time_delta</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">api_limit_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="n">time_delta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">throughput_statistics</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">time_delta</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+    <span class="n">api_limit_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">api_limit_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </code></pre></div>
         </details>
     </div>
