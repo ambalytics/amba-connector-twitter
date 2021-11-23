@@ -56,14 +56,19 @@ class TwitterConnector(EventStreamProducer):
 
         self.counter = 0
 
-        threading.Timer(time_delta, self.throughput_statistics, args=[time_delta, i]).start()
+        api_limit_thread = threading.Timer(time_delta, self.throughput_statistics, args=[time_delta, i])
+        api_limit_thread.daemon = True
+        api_limit_thread.start()
 
     def send_data(self):
         """open the stream to twitter and send the data as events to kafka
         """
         time_delta = 30
         self.counter = 0
-        threading.Timer(time_delta, self.throughput_statistics, args=[time_delta, 0]).start()
+
+        api_limit_thread = threading.Timer(time_delta, self.throughput_statistics, args=[time_delta, 0])
+        api_limit_thread.daemon = True
+        api_limit_thread.start()
 
         bearer_token = os.getenv('TWITTER_BEARER_TOKEN')
         headers = create_headers(bearer_token)
@@ -157,7 +162,7 @@ class TwitterConnector(EventStreamProducer):
                 logging.exception(self.log)
             except requests.ConnectionError:
                 logging.exception(self.log)
-                time.sleep(10)  # sleep a little to avoid issues with max connections
+                time.sleep(5)  # sleep a little to avoid issues with max connections
             finally:
                 logging.warning('stream restart in 10')
                 time.sleep(10)
